@@ -17,6 +17,10 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
+async def on_read():
+    print("Online")
+
+@bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
@@ -34,7 +38,7 @@ async def news(ctx):
         response = requests.get('https://fc.toyamanao.com/news/1/?page=1', headers=headers)
     except requests.exceptions.RequestException as e:
         await ctx.send(e)
-    url = "https://fc.toyamanao.com/news"
+    url = "https://fc.toyamanao.com"
     
     database = []
     try:
@@ -51,7 +55,7 @@ async def news(ctx):
         existing_links.add(database[index]["link"])
         
     content = BeautifulSoup(response.content, 'html.parser', parse_only=SoupStrainer(class_="clearfix"))    
-    
+    sent = False
     for link in content:
             row = {"link":url+link["href"], "date":link.select(".date")[0].text, "title":link.select(".tit")[0].text}
             if row["link"] in existing_links:
@@ -59,7 +63,11 @@ async def news(ctx):
             else:
                 existing_links.add(row["link"])
                 database.append(row)
+                sent = True
                 await ctx.send(row["date"] + " " + row["title"] + "\n" + row["link"])
+    if not sent:
+        await ctx.send("No news")
+
     try:
         with open('database.csv', 'w', newline='') as csvfile:
             fieldnames = ['link', 'date', 'title']
