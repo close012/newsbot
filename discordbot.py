@@ -1,15 +1,14 @@
 from bs4 import BeautifulSoup, SoupStrainer
 import csv
 import discord
-from discord.ext import tasks, commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import logging
 import requests
 import os
 
 load_dotenv()
-token = os.getenv('DISCORD_TOKEN')
-
+token = os.getenv("DISCORD_TOKEN")
 handler = logging.FileHandler(filename='discord.log',encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
@@ -17,8 +16,9 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
-async def on_read():
-    print("Online")
+async def on_ready():
+    user = await bot.fetch_user("196554995460472832")
+    await user.send("Online!")
 
 @bot.event
 async def on_message(message):
